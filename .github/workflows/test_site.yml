@@ -1,0 +1,31 @@
+name: Test Deployed Website
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # runs every hour
+  workflow_dispatch:       # also allows manual run
+
+jobs:
+  test-site:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Test homepage accessibility
+        run: |
+          STATUS=$(curl -o /dev/null -s -w "%{http_code}\n" https://yourusername.github.io/IoT_development/)
+          if [ "$STATUS" -ne 200 ]; then
+            echo "Website is down! Status: $STATUS"
+            exit 1
+          else
+            echo "Website is up! Status: $STATUS"
+          fi
+
+      - name: Check key page exists
+        run: |
+          curl -s https://yourusername.github.io/IoT_development/about.html | grep -q "About our IoT project"
+          if [ $? -ne 0 ]; then
+            echo "About page missing or incorrect!"
+            exit 1
+          else
+            echo "About page exists and is correct."
+          fi
